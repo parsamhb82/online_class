@@ -12,3 +12,16 @@ class CreateOnlineClass(CreateAPIView):
     queryset = OnlineClass.objects.all()
     serializer_class = CreateOnlineClassSerilizer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs['context'] = {'request': self.request}
+        return super().get_serializer(*args, **kwargs)
+
+class UpdateOnlineClass(UpdateAPIView):
+    queryset = OnlineClass.objects.all()
+    serializer_class = CreateOnlineClassSerilizer
+    permission_classes = [IsAuthenticated]
+
+    # only patch method is allowed
+    http_method_names = ['patch']
+    

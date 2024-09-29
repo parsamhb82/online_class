@@ -49,6 +49,39 @@ class CreateOnlineClassSerilizer(serializers.ModelSerializer):
         online_class.save()
         return online_class
 
+class UpdateOnlineClassSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = OnlineClass
+        fields = ['name', 'is_private', 'has_limit', 'limit', 'description', 'invitational', 'password', 'adding_start_time', 'adding_end_time']
+
+    def validate(self, data):
+        if data['has_limit'] and not data['limit']:
+            raise serializers.ValidationError('Limit is required when has_limit is True')
+        if data['is_private'] and not data['password'] and not data['invitational']:
+            raise serializers.ValidationError('Password or invitational is required when is_private is True')
+        if data['invitational'] and data['password']:
+            raise serializers.ValidationError('only one of password or invitational is allowed')
+
+        return data
+    
+    def update(self, instance, validated_data):
+        if 'password' in validated_data and validated_data['password']:
+            validated_data['password'] = make_password(validated_data['password'])
+    
+        instance.name = validated_data.get('name', instance.name)
+        instance.is_private = validated_data.get('is_private', instance.is_private)
+        instance.has_limit = validated_data.get('has_limit', instance.has_limit)
+        instance.limit = validated_data.get('limit', instance.limit)
+        instance.description = validated_data.get('description', instance.description)
+        instance.invitational = validated_data.get('invitational', instance.invitational)
+        instance.adding_start_time = validated_data.get('adding_start_time', instance.adding_start_time)
+        instance.adding_end_time = validated_data.get('adding_end_time', instance.adding_end_time)
+        
+        if 'password' in validated_data and validated_data['password']:
+            instance.password = make_password(validated_data['password'])
+        instance.save()
+        return instance
+        
         
     
 
