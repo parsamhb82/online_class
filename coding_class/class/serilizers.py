@@ -2,6 +2,10 @@ from rest_framework import serializers
 from .models import OnlineClass
 import uuid
 from django.contrib.auth.hashers import make_password
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from django.contrib.auth.hashers import check_password
+from rest_framework import status
 
 def generate_unique_class_code():
     while True:
@@ -67,6 +71,11 @@ class UpdateOnlineClassSerilizer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'password' in validated_data and validated_data['password']:
             validated_data['password'] = make_password(validated_data['password'])
+        
+        user = self.context['request'].user
+        teacher = user.userprofile
+        if teacher not in instance.teachers:
+            return Response({'error': 'You are not authorized to update this class'}, status=status.HTTP_403_FORBIDDEN)
     
         instance.name = validated_data.get('name', instance.name)
         instance.is_private = validated_data.get('is_private', instance.is_private)
@@ -76,11 +85,31 @@ class UpdateOnlineClassSerilizer(serializers.ModelSerializer):
         instance.invitational = validated_data.get('invitational', instance.invitational)
         instance.adding_start_time = validated_data.get('adding_start_time', instance.adding_start_time)
         instance.adding_end_time = validated_data.get('adding_end_time', instance.adding_end_time)
+
         
         if 'password' in validated_data and validated_data['password']:
             instance.password = make_password(validated_data['password'])
         instance.save()
         return instance
+    
+class OnlineClassViewStudetsView(serializers.ModelSerializer):
+    students_username = serializers.SerializerMethodField()
+    class Meta:
+        model = OnlineClass
+        fields = ['name', 'students_username']
+    
+    def get_students_username(self, obj):
+        students = obj.students.all()
+        return [student.user.username for student in students]
+    
+class AddUserToClassSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+
+    class Meta:
+        model = OnlineClass
+        fields = ['code', 'username']
+    
+
         
         
     

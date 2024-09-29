@@ -5,6 +5,7 @@ class OnlineClass(models.Model):
     code = models.CharField(max_length=32, unique=True)
     name = models.CharField(max_length=100)
     teachers = models.ManyToManyField(UserProfile, blank=True, related_name="teachers")
+    mentors = models.ManyToManyField(UserProfile, blank=True, related_name="mentors")
     students = models.ManyToManyField(UserProfile, blank=True, related_name="students")
     is_private = models.BooleanField(default=True)
     has_limit = models.BooleanField(default=False)
