@@ -108,6 +108,11 @@ class AddUserToClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = OnlineClass
         fields = ['code', 'username']
+
+class EnterTheClassByPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(required=True)
+    code = serializers.CharField(required=True)
+
     
 
         

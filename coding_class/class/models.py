@@ -17,4 +17,9 @@ class OnlineClass(models.Model):
     adding_end_time = models.DateTimeField(blank=True)
     available = models.BooleanField(default=True)
 
+class Enrollment(models.Model):
+    userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    class_enrolled = models.ForeignKey(OnlineClass, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=False)
+    token = models.CharField(max_length=255, blank=True, null=True)
 
