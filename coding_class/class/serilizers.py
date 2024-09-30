@@ -113,6 +113,14 @@ class EnterTheClassByPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
     code = serializers.CharField(required=True)
 
+class StudentsClassViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OnlineClass
+        fields = ['id', 'name', 'available', 'limit']
+
+class AddStudentToClassSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=255)
+
     
 
         

@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import CreateAPIView, UpdateAPIView, ListAPIView, RetrieveAPIView
 from .permissions import IsTeacherOfClass
 from  django.contrib.auth.models import User
-from .serilizers import EnterTheClassByPasswordSerializer
+from .serilizers import EnterTheClassByPasswordSerializer, StudentsClassViewSerializer, AddStudentToClassSerializer
 from django.contrib.auth.hashers import make_password
 import secrets
 from .models import Enrollment
@@ -179,8 +179,50 @@ class ConfirmEnrollmentView(APIView):
            return Response({'error': 'Enrollment already confirmed'}, status=400)
         enrollment.is_active = True
         enrollment.token = None
+        enrollment.class_enrolled.students.add(enrollment.userprofile)
+        enrollment.class_enrolled.save()#dunno if it works fine
         enrollment.save()
         return Response({'message': 'Enrollment confirmed successfully'}, status=200)
+
+class StudentClassView(ListAPIView):
+    queryset = OnlineClass.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = StudentsClassViewSerializer
+
+    def get_queryset(self):
+        return OnlineClass.objects.filter(available=True)
+
+class StudentAddView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = AddStudentToClassSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            class_code = serializer.validated_data['code']
+            online_class = OnlineClass.objects.get(code=class_code)
+            user = request.user
+            student = user.userprofile
+            if student in online_class.students.all() and student in online_class.mentors.all() and student in online_class.teachers.all():
+                return Response({'message': 'User is already a member of this class'}, status=status.HTTP_400_BAD_REQUEST)
+            if online_class.is_private == True:
+                return Response({'message': 'You cannot add a student to this class because it is private'}, status=status.HTTP_400_BAD_REQUEST)
+            if online_class.has_limit and online_class.students.count() >= online_class.limit:
+                online_class.available = False
+                return Response({'message': 'You cannot add a student to this class because it has reached its limit'}, status=status.HTTP_400_BAD_REQUEST)
+            online_class.students.add(student)
+            online_class.save()
+            return Response({'message': 'Student added successfully'}, status=status.HTTP_200_OK)
+        except OnlineClass.DoesNotExist:
+            return Response({'message': 'Online class not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+    
+
+
+
 
 
 
