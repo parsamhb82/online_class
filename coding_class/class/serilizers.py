@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from django.contrib.auth.hashers import check_password
 from rest_framework import status
+from forum.models import Forum
 
 def generate_unique_class_code():
     while True:
@@ -49,7 +50,11 @@ class CreateOnlineClassSerilizer(serializers.ModelSerializer):
             code=code,
             **validated_data
         )
+
         online_class.teachers.add(teacher)
+        Forum.objects.create(
+            online_class=online_class,
+        )
         online_class.save()
         return online_class
 
