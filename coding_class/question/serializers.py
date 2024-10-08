@@ -59,3 +59,32 @@ class CreateFileQuestionAnswerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("file is required")
         return data
     
+class CreateTeamSerializer(serializers.ModelSerializer):
+    # Field to accept usernames
+    usernames = serializers.ListField(
+        child=serializers.CharField(), write_only=True
+    )
+
+    class Meta:
+        model = Team
+        fields = ['name', 'question', 'usernames']  # Add other fields if necessary
+
+    def create(self, validated_data):
+        # Extract usernames from the validated data
+        usernames = validated_data.pop('usernames')
+
+        # Create the Team instance
+        team = Team.objects.create(**validated_data)
+
+        # Retrieve UserProfile instances and add them to the team
+        user_profiles = UserProfile.objects.filter(user__username__in=usernames)
+        team.users.set(user_profiles)
+
+        return team
+
+    def validate_usernames(self, value):
+        # Ensure all usernames exist in the system
+        invalid_usernames = [username for username in value if not UserProfile.objects.filter(user__username=username).exists()]
+        if invalid_usernames:
+            raise serializers.ValidationError(f"These usernames are invalid: {', '.join(invalid_usernames)}")
+        return value

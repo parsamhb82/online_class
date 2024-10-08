@@ -6,6 +6,7 @@ from .serializers import AssignmentSerilizer, CreateFileQuestionAnswerSerializer
 from .models import Question, Assignment, Team
 from rest_framework.permissions import IsAuthenticated
 from online_class.models import OnlineClass
+from .serializers import CreateTeamSerializer
 
 class CreateAssignment(CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -63,6 +64,7 @@ class CreateTextQuestionAnswer(CreateAPIView):
             return Response({"message" : "you cant answer this question"}, status= status.HTTP_403_FORBIDDEN)
         serializer.save(student=student)
 
+
 class CreateFileQuestionAnswer(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CreateFileQuestionAnswerSerializer
@@ -73,6 +75,20 @@ class CreateFileQuestionAnswer(CreateAPIView):
         if student not in question.assignment.online_class.students.all():
             return Response({"message" : "you cant answer this question"}, status= status.HTTP_403_FORBIDDEN)
         serializer.save(student=student)
+
+
+class CreateTeamView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CreateTeamSerializer
+    queryset = Team.objects.all()
+    def perform_create(self, serializer):
+        question = serializer.validated_data['question']
+        assignment = question.assignment
+        online_class = assignment.online_class
+        user_profile = self.request.user.userprofile
+        if user_profile not in online_class.teachers.all() or user_profile not in online_class.mentors.all():
+            return Response({"message" : "you cant create a team"}, status= status.HTTP_403_FORBIDDEN)
+        return super().perform_create(serializer)
 
 
     

@@ -28,6 +28,7 @@ class Question(models.Model):
     scoring_way = models.IntegerField(default=0)
 
 class Team(models.Model):
+    name = models.CharField(max_length=100)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     users = models.ManyToManyField("user.UserProfile")
 
@@ -37,6 +38,6 @@ class QuestionAnswer(models.Model):
     file = models.FileField(upload_to='question_answers/', blank=True, null=True)
     text = models.TextField(blank=True, null=True)
     score = models.IntegerField(blank=True, null=True)
-    
+
 
 
