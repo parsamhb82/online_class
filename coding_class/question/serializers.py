@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Assignment, Question, Team, QuestionAnswer
+from user.models import UserProfile
 
 class AssignmentSerilizer(serializers.ModelSerializer):
 
