@@ -2,7 +2,7 @@ from django.db import models
 
 class Assignment(models.Model):
     name = models.CharField(max_length=100)
-    online_class = models.ForeignKey("class.OnlineClass")
+    online_class = models.ForeignKey("online_class.OnlineClass", on_delete=models.CASCADE)
 
 
 class Question(models.Model):

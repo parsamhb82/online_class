@@ -1,7 +1,7 @@
 from django.db import models
 
 class Forum(models.Model):
-    online_class = models.ForeignKey('class.OnlineClass', on_delete= models.CASCADE)
+    online_class = models.ForeignKey('online_class.OnlineClass', on_delete= models.CASCADE)
     
 class Room(models.Model):
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE)

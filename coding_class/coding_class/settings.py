@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'forum',
+    'question',
 ]
 
 MIDDLEWARE = [
@@ -86,8 +87,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': env("DB_NAME"),
-        'USER': env("DATABASE_USER"),
-        'PASSWORD': env("DATABASE_PASSWORD"),
+        'USER': env("DB_USER"),
+        'PASSWORD': env("DB_PASSWORD"),
         'HOST' : '127.0.0.1',
         'PORT' : '5432'
     }
