@@ -23,4 +23,5 @@ urlpatterns = [
     path('class/', include('online_class.urls')),
     path('forum/', include('forum.urls')),
     path('question/', include('question.urls')),
+    path('activity/', include('activity.urls')),
 ]
