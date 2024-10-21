@@ -111,3 +111,13 @@ class CreateCommentSerilizer(serializers.ModelSerializer):
             raise serializers.ValidationError("You are not allowed to comment")
         comment = Comment.objects.create(question_answer=question_answer, text=validated_data.get("text"), user_profile=user_profile)
         return comment
+    
+class StudentAnswerScoreSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionAnswer
+        fields = ["question_answer", "score"]
+
+    def validate(self, data):
+        if data.get("score") == '' or data.get("score") < 0 or type(data.get("score")) != int:
+            raise serializers.ValidationError("given score is not valid")
+        return data
