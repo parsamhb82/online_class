@@ -2,11 +2,12 @@ from django.shortcuts import render
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import AssignmentSerilizer, CreateFileQuestionAnswerSerializer, CreateTextQuestionAnswerSerializer, CreateQuestionSerializer
+from .serializers import AssignmentSerilizer, CreateFileQuestionAnswerSerializer, CreateTextQuestionAnswerSerializer, CreateQuestionSerializer, CreateCommentSerilizer
 from .models import Question, Assignment, Team
 from rest_framework.permissions import IsAuthenticated
 from online_class.models import OnlineClass
 from .serializers import CreateTeamSerializer
+from .models import Comment
 
 class CreateAssignment(CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -90,7 +91,13 @@ class CreateTeamView(CreateAPIView):
             return Response({"message" : "you cant create a team"}, status= status.HTTP_403_FORBIDDEN)
         return super().perform_create(serializer)
 
-
+class CreateCommentSerializer(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CreateCommentSerilizer
+    queryset = Comment.objects.all()
+    def get_serializer(self, *args, **kwargs):
+        kwargs['context'] = {'request': self.request}
+        return super().get_serializer(*args, **kwargs)
 
 
     

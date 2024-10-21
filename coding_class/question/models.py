@@ -3,6 +3,7 @@ from django.db import models
 class Assignment(models.Model):
     name = models.CharField(max_length=100)
     online_class = models.ForeignKey("online_class.OnlineClass", on_delete=models.CASCADE)
+    activity = models.ForeignKey("activity.Activity", on_delete=models.CASCADE, blank=True, null=True)
 
 
 class Question(models.Model):
@@ -38,6 +39,13 @@ class QuestionAnswer(models.Model):
     file = models.FileField(upload_to='question_answers/', blank=True, null=True)
     text = models.TextField(blank=True, null=True)
     score = models.IntegerField(blank=True, null=True)
+
+class Comment(models.Model):
+    question_answer = models.ForeignKey(QuestionAnswer, on_delete=models.CASCADE)
+    user = models.ForeignKey("user.UserProfile", on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 

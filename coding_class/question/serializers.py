@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Assignment, Question, Team, QuestionAnswer
+from .models import Assignment, Question, Team, QuestionAnswer, Comment
 from user.models import UserProfile
 
 class AssignmentSerilizer(serializers.ModelSerializer):
@@ -89,3 +89,25 @@ class CreateTeamSerializer(serializers.ModelSerializer):
         if invalid_usernames:
             raise serializers.ValidationError(f"These usernames are invalid: {', '.join(invalid_usernames)}")
         return value
+
+
+class CreateCommentSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ["question_answer", "text"]
+        
+    def validate(self, data):
+        if data.get("text") == '':
+            raise serializers.ValidationError("text is required")
+        return data
+    
+    def create(self, validated_data):
+        question_asnwer_id = validated_data.get("question_answer")
+        question_answer = QuestionAnswer.objects.get(id=question_asnwer_id)
+        user = self.context.get("request").user
+        user_profile = UserProfile.objects.get(user=user)
+        online_class = question_answer.question.assignment.online_class
+        if user_profile not in online_class.teachers.all() or user_profile not in online_class.mentors.all():
+            raise serializers.ValidationError("You are not allowed to comment")
+        comment = Comment.objects.create(question_answer=question_answer, text=validated_data.get("text"), user_profile=user_profile)
+        return comment
