@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Assignment, Question, Team, QuestionAnswer, Comment
 from user.models import UserProfile
+from activity.models import StudentActivity
+from django.db.models import Sum
 
 class AssignmentSerilizer(serializers.ModelSerializer):
 
@@ -28,9 +30,24 @@ class CreateQuestionSerializer(serializers.ModelSerializer):
         if data.get('is_team') == True and not data.get('teams_status'):
             raise serializers.ValidationError("teams status is required")
         
-        return data
+        return super().validate(data)
     
     def create(self, validated_data):
+        if validated_data.get("is_team") == True and validated_data.get("teams_status") == 3:
+            num_of_students_in_each_team = validated_data.get("num_students_in_each_team")
+            assignment_id = validated_data.get("assignment")
+            assignment = Assignment.objects.get(id=assignment_id)
+            online_class = assignment.online_class
+            student_activities = StudentActivity.objects.filter(activity__online_class=online_class)
+            students_scores = student_activities.values('userprofile__user__username').annotate(total_score=Sum('score')).order_by('-total_score')
+            
+            # Format the scoresheet as a list of dictionaries
+            scoresheet = [
+                {'username': student['userprofile__user__username'], 'total_score': student['total_score']}
+                for student in students_scores
+            ]
+            num_of_students = len(scoresheet)
+            num_of_teams = num_of_students // num_of_students_in_each_team ##need to get finished
         question = Question.objects.create(**validated_data)
         return question
     

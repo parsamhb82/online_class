@@ -17,6 +17,8 @@ from django.urls import reverse
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.http import urlencode
+from activity.models import StudentActivity
+from django.db.models import Sum
 
 def generate_token():
     return secrets.token_urlsafe(16)
@@ -219,6 +221,31 @@ class StudentAddView(APIView):
         except Exception as e:
             return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
+class StudentsScoreSheet(APIView):##needs to be tested
+    permission_classes = [IsAuthenticated]
+    def get(self, request, class_code):
+        try:
+            online_class = OnlineClass.objects.get(code=class_code)
+            user = request.user
+            user_profile = user.userprofile
+            if online_class.is_private == True and user_profile not in online_class.students.all() and user_profile not in online_class.mentors.all() and user_profile not in online_class.teachers.all():
+                return Response({'message': 'You cannot view the score sheet of this class because it is private'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            student_activities = StudentActivity.objects.filter(activity__online_class=online_class)
+            students_scores = student_activities.values('userprofile__user__username').annotate(total_score=Sum('score')).order_by('-total_score')
+            
+            # Format the scoresheet as a list of dictionaries
+            scoresheet = [
+                {'username': student['userprofile__user__username'], 'total_score': student['total_score']}
+                for student in students_scores
+            ]
+            
+            # Return the scoresheet in the response
+            return Response({'scoresheet': scoresheet}, status=status.HTTP_200_OK)
+        
+
+        except OnlineClass.DoesNotExist:
+            return Response({'message': 'Online class not found'}, status=status.HTTP_404_NOT_FOUND)
 
             
     

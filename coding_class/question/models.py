@@ -27,6 +27,7 @@ class Question(models.Model):
     is_team = models.BooleanField(default=False)
     teams_status = models.IntegerField(blank=True, null=True)
     scoring_way = models.IntegerField(default=0)
+    num_students_in_each_team = models.IntegerField(blank=True, null=True, default=1)
 
 class Team(models.Model):
     name = models.CharField(max_length=100)
