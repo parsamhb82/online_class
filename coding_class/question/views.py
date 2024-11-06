@@ -94,7 +94,7 @@ class CreateTeamView(CreateAPIView):
             return Response({"message" : "you cant create a team"}, status= status.HTTP_403_FORBIDDEN)
         return super().perform_create(serializer)
 
-class CreateCommentSerializer(CreateAPIView):
+class CreateCommentView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CreateCommentSerilizer
     queryset = Comment.objects.all()
@@ -103,7 +103,7 @@ class CreateCommentSerializer(CreateAPIView):
         return super().get_serializer(*args, **kwargs)
     
 
-class StudentAnswerScoreSetview(APIView):
+class StudentAnswerScoreSetview(APIView):## need to be checked
     permission_classes = [IsAuthenticated]
     serializer_class = StudentAnswerScoreSerilizer
     queryset = QuestionAnswer.objects.all()

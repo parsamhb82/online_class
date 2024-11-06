@@ -1,3 +1,12 @@
-from django.contrib import admin
+from django.contrib.admin import register, ModelAdmin
 
-# Register your models here.
+from .models import *
+
+@register(Activity)
+class ActivityAdmin(ModelAdmin):
+    pass
+
+@register(StudentActivity)
+class StudentActivityAdmin(ModelAdmin):
+    pass
+
